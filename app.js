@@ -3,7 +3,7 @@ require('isomorphic-fetch');
 require('dotenv').config();
 const PromiseThrottle = require('promise-throttle');
 const argv = require('yargs').argv
-const TAG_TO_MATCH = argv.tag;
+const TAG_TO_MATCH = `${argv.tag}`;
 
 const INTERCOM_API = process.env.INTERCOM_API;
 const INTERCOM_AUTH_TOKEN = process.env.INTERCOM_AUTH_TOKEN;
@@ -24,7 +24,8 @@ const fetchDetailedConversation = (conversationId) => {
     let tagList = json.tags.tags;
     let hasTheTag = false;
     if (tagList.length > 0) {
-      hasTheTag = tagList.find(t => t.id === TAG_TO_MATCH)
+      let matchingTags = tagList.filter(t => t.id === TAG_TO_MATCH);
+      hasTheTag = matchingTags.length > 0;
     }
 
     if (hasTheTag) {
@@ -94,10 +95,10 @@ const fetchAllConversationIds = () => {
 const begin = async () => {
   let idList = await fetchAllConversationIds();
   let flattenedIdList = [].concat(...idList);
-  // console.log(JSON.stringify(flattenedIdList, null, 4));
+  console.log(JSON.stringify(flattenedIdList, null, 4));
 
-  let detailedConversations = await fetchAllDetailedConversations(flattenedIdList);
-  detailedConversations = detailedConversations.filter(c => c !== null);
+  let conversationList = await fetchAllDetailedConversations(flattenedIdList);
+  let detailedConversations = conversationList.filter(c => c !== null);
   console.log(JSON.stringify(detailedConversations, null, 4));
 }
 

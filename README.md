@@ -34,7 +34,7 @@ You'll need to have a `.env` file setup with the following:
  - This only works on > Node 6. Or > Node 7. I've only tested it on Node 8, so that's all I can safely say it works with.
  
 ### Test
-![](http://i.imgur.com/LBM55wY.gif)
+![](https://i.imgur.com/LBM55wY.gif)
 
 ## Why?
 ### Why is it called `helpful-invention`?
