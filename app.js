@@ -12,7 +12,7 @@ const INTERCOM_PAGE_COUNT = 5;
 const PER_PAGE = 60;
 const PROMISE_THROTTLE_RPS = 5;
 
-const fetchSingleConversation = (conversationId) => {
+const fetchDetailedConversation = (conversationId) => {
   return fetch(`${INTERCOM_API}/conversations/${conversationId}`, {
     method: 'GET',
     headers:{
@@ -22,15 +22,39 @@ const fetchSingleConversation = (conversationId) => {
   }).then(response => response.json())
   .then (json => {
     let tagList = json.tags.tags;
-    if (tagList.length === 0) {
-      return null;
-    } else {
+    let hasTheTag = false;
+    if (tagList.length > 0) {
+      hasTheTag = tagList.find(t => t.id === TAG_TO_MATCH)
+    }
+
+    if (hasTheTag) {
       return json;
+    } else {
+      return null;
     }
   }).catch((err) => {
     console.error(err);
   });
 };
+
+const fetchAllDetailedConversations = (idList) => {
+  let allConversations = [];
+
+  for (i = 0; i <= idList.length; i++) {
+    let promiseThrottle = new PromiseThrottle({
+      requestsPerSecond: PROMISE_THROTTLE_RPS,
+      promiseImplementation: Promise
+    });
+    allConversations.push(promiseThrottle.add(fetchDetailedConversation.bind(this, idList[i])));
+  }
+
+  return Promise.all(allConversations)
+    .then(function(conversationList) {
+      return conversationList;
+    }).catch((err) => {
+      console.error(err);
+    });
+}
 
 const fetchConversationList = (pageNumber) => {
   return fetch(`${INTERCOM_API}/conversations?per_page=${PER_PAGE}&page=${pageNumber}`, {
@@ -49,8 +73,7 @@ const fetchConversationList = (pageNumber) => {
 };
 
 const fetchAllConversationIds = () => {
-  let allConversations = [],
-      allConversationIds = [];
+  let allConversations = [];
 
   for (i = 1; i <= INTERCOM_PAGE_COUNT; i++) {
     let promiseThrottle = new PromiseThrottle({
@@ -68,9 +91,14 @@ const fetchAllConversationIds = () => {
     });
 }
 
-const scrapeIntercom = async () => {
+const begin = async () => {
   let idList = await fetchAllConversationIds();
-  console.log(JSON.stringify(idList, null, 4));
+  let flattenedIdList = [].concat(...idList);
+  // console.log(JSON.stringify(flattenedIdList, null, 4));
+
+  let detailedConversations = await fetchAllDetailedConversations(flattenedIdList);
+  detailedConversations = detailedConversations.filter(c => c !== null);
+  console.log(JSON.stringify(detailedConversations, null, 4));
 }
 
-scrapeIntercom();
+begin();

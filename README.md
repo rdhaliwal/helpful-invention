@@ -1,4 +1,4 @@
-# Fantastic Adventure
+# Helpful Invention
 
 ## What?
 ### What is this?
@@ -21,8 +21,9 @@ You'll need to have a `.env` file setup with the following:
  - run `yarn install`
 
 ### Run:
- - run `yarn scrape` 
- - or `node app.js`
+ - run `yarn tags` to fetch a list of all your tags in Intercom
+ - run `yarn conversations -- --tag='12343'`
+   - `--tag` is the id of the tag that you want to get all conversations that have this tag
 
 #### Debugging
  - `node --inspect-brk app.js` 
@@ -36,7 +37,7 @@ You'll need to have a `.env` file setup with the following:
 ![](http://i.imgur.com/LBM55wY.gif)
 
 ## Why?
-### Why is it called `fantastic-adventure`?
+### Why is it called `helpful-invention`?
 Because GitHub generates the best repository names.
 
 
