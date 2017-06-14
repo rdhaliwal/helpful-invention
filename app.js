@@ -2,6 +2,8 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('dotenv').config();
 const PromiseThrottle = require('promise-throttle');
+const argv = require('yargs').argv
+const TAG_TO_MATCH = argv.tag;
 
 const INTERCOM_API = process.env.INTERCOM_API;
 const INTERCOM_AUTH_TOKEN = process.env.INTERCOM_AUTH_TOKEN;
