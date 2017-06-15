@@ -2,6 +2,8 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('dotenv').config();
 const PromiseThrottle = require('promise-throttle');
+const json2csv = require('json2csv');
+const fs = require('fs');
 const argv = require('yargs').argv;
 const TAG_TO_MATCH = argv.tag;
 
@@ -13,6 +15,19 @@ const INTERCOM_PAGE_COUNT = 5;
 const PER_PAGE = 60;
 const PROMISE_THROTTLE_RPS = 1;
 
+const generateCSV = (data) => {
+  try {
+    var result = json2csv({ data: data });
+    // console.log(result);
+    fs.writeFile('result.csv', result, (err) => {
+      if (err) throw err;
+      console.log('File saved');
+    });
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 const extractData = (data) => {
   // console.log(JSON.stringify(data, null, 4));
 
@@ -20,9 +35,9 @@ const extractData = (data) => {
   result.id = data.id;
   result.created_at = data.created_at;
   result.updated_at = data.updated_at;
-  result.body = data.conversation_parts.conversation_parts.map(c => c.body);
+  result.body = data.conversation_parts.conversation_parts.map(c => c.body).join(' | ');
   result.subject = data.conversation_message.subject;
-  result.tags = data.tags.tags;
+  result.tags = data.tags.tags.map(t => t.name);
   result.user = data.user;
   return result;
 };
@@ -134,7 +149,9 @@ const begin = async () => {
 
   let conversationList = await fetchAllDetailedConversations(flattenedIdList);
   let detailedConversations = conversationList.filter(c => (c !== undefined && c !== null));
-  console.log(JSON.stringify(detailedConversations, null, 4));
+  // console.log(JSON.stringify(detailedConversations, null, 4));
+
+  generateCSV(detailedConversations);
 };
 
 begin();

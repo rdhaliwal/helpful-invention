@@ -18,3 +18,4 @@ coverage/
 
 .env
 scratch.js
+*.csv

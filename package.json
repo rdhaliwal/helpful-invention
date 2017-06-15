@@ -11,6 +11,7 @@
     "dotenv": "^4.0.0",
     "es6-promise": "^4.1.0",
     "isomorphic-fetch": "^2.2.1",
+    "json2csv": "^3.7.3",
     "promise-throttle": "^0.3.1",
     "yargs": "^8.0.2"
   },

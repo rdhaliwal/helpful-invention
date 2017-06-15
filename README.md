@@ -21,9 +21,12 @@ You'll need to have a `.env` file setup with the following:
  - run `yarn install`
 
 ### Run:
- - run `yarn tags` to fetch a list of all your tags in Intercom
- - run `yarn conversations -- --tag='12343'`
-   - `--tag` is the id of the tag that you want to get all conversations that have this tag
+ - Run `yarn tags` to fetch a list of all your tags in Intercom
+   - this will print a list of all the tags and their ids, for use later if you want
+ - Run `yarn conversations` to export all conversations that have any tag
+ - Run `yarn conversations -- --tag='12343'` to export conversations that have only that tag
+   - `--tag` is the id of the tag. 
+ - The output will be saved in `result.csv`
 
 #### Debugging
  - `node --inspect-brk app.js` 
@@ -34,7 +37,7 @@ You'll need to have a `.env` file setup with the following:
  - This only works on > Node 6. Or > Node 7. I've only tested it on Node 8, so that's all I can safely say it works with.
  
 ### Test
-![](https://i.imgur.com/LBM55wY.gif)
+[Yes.](https://i.imgur.com/LBM55wY.gif)
 
 ## Why?
 ### Why is it called `helpful-invention`?
