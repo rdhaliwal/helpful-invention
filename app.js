@@ -9,11 +9,10 @@ const TAG_TO_MATCH = argv.tag;
 
 const INTERCOM_API = process.env.INTERCOM_API;
 const INTERCOM_AUTH_TOKEN = process.env.INTERCOM_AUTH_TOKEN;
-// const INTERCOM_PAGE_COUNT = 51;
-const INTERCOM_PAGE_COUNT = 5;
+const INTERCOM_PAGE_COUNT = 20;
 // const INTERCOM_PAGE_COUNT = 1;
 const PER_PAGE = 60;
-const PROMISE_THROTTLE_RPS = 1;
+const PROMISE_THROTTLE_RPS = 6;
 
 const generateCSV = (data) => {
   try {
@@ -81,14 +80,14 @@ const fetchDetailedConversation = (conversationId) => {
 const fetchAllDetailedConversations = (idList) => {
   let allConversations = [];
 
+  let promiseThrottle = new PromiseThrottle({
+    requestsPerSecond: PROMISE_THROTTLE_RPS,
+    promiseImplementation: Promise
+  });
+
   for (i = 0; i <= idList.length; i++) {
-    let promiseThrottle = new PromiseThrottle({
-      requestsPerSecond: PROMISE_THROTTLE_RPS
-      // promiseImplementation: Promise
-    });
     allConversations.push(promiseThrottle.add(fetchDetailedConversation.bind(this, idList[i])));
   }
-  console.log(allConversations);
 
   return Promise.all(allConversations)
     .then(function(conversationList) {
@@ -126,11 +125,12 @@ const fetchConversationList = (pageNumber) => {
 const fetchAllConversationIds = () => {
   let allConversations = [];
 
+  let promiseThrottle = new PromiseThrottle({
+    requestsPerSecond: PROMISE_THROTTLE_RPS,
+    promiseImplementation: Promise
+  });
+
   for (i = 1; i <= INTERCOM_PAGE_COUNT; i++) {
-    let promiseThrottle = new PromiseThrottle({
-      requestsPerSecond: PROMISE_THROTTLE_RPS
-      // promiseImplementation: Promise
-    });
     allConversations.push(promiseThrottle.add(fetchConversationList.bind(this, i)));
   }
 
@@ -149,7 +149,7 @@ const begin = async () => {
 
   let conversationList = await fetchAllDetailedConversations(flattenedIdList);
   let detailedConversations = conversationList.filter(c => (c !== undefined && c !== null));
-  // console.log(JSON.stringify(detailedConversations, null, 4));
+  console.log(JSON.stringify(detailedConversations, null, 4));
 
   generateCSV(detailedConversations);
 };
