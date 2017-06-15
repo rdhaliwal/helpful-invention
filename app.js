@@ -2,8 +2,8 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('dotenv').config();
 const PromiseThrottle = require('promise-throttle');
-const argv = require('yargs').argv
-const TAG_TO_MATCH = `${argv.tag}`;
+const argv = require('yargs').argv;
+const TAG_TO_MATCH = argv.tag;
 
 const INTERCOM_API = process.env.INTERCOM_API;
 const INTERCOM_AUTH_TOKEN = process.env.INTERCOM_AUTH_TOKEN;
@@ -25,7 +25,7 @@ const extractData = (data) => {
   result.tags = data.tags.tags;
   result.user = data.user;
   return result;
-}
+};
 
 const fetchDetailedConversation = (conversationId) => {
   console.log(`FETCH - BEGIN - Conversation ${conversationId}: ${Date()}`);
@@ -43,15 +43,16 @@ const fetchDetailedConversation = (conversationId) => {
     }
   })
   .then (json => {
-    console.log(`FETCH - SUCCESS - Conversation ${conversationId}`);
+    console.log(`FETCH - SUCCESS - Conversation ${conversationId}: ${Date()}`);
     let tagList = json.tags.tags;
-    let hasTheTag = false;
-    if (tagList.length > 0) {
-      let matchingTags = tagList.filter(t => t.id === TAG_TO_MATCH);
-      hasTheTag = matchingTags.length > 0;
+    let hasMatchingTags = tagList.length > 0;
+
+    if (hasMatchingTags && TAG_TO_MATCH !== undefined) {
+      let matchingTags = tagList.filter(t => t.id === `${TAG_TO_MATCH}`);
+      hasMatchingTags = matchingTags.length > 0;
     }
 
-    if (hasTheTag) {
+    if (hasMatchingTags) {
       return extractData(json);
     } else {
       return null;
@@ -80,7 +81,7 @@ const fetchAllDetailedConversations = (idList) => {
     }).catch((err) => {
       console.error(err);
     });
-}
+};
 
 const fetchConversationList = (pageNumber) => {
   console.log(`FETCH - BEGIN - Conversation Page ${pageNumber}: ${Date()}`);
@@ -124,7 +125,7 @@ const fetchAllConversationIds = () => {
     }).catch((err) => {
       console.error(err);
     });
-}
+};
 
 const begin = async () => {
   let idList = await fetchAllConversationIds();
@@ -134,10 +135,6 @@ const begin = async () => {
   let conversationList = await fetchAllDetailedConversations(flattenedIdList);
   let detailedConversations = conversationList.filter(c => (c !== undefined && c !== null));
   console.log(JSON.stringify(detailedConversations, null, 4));
-}
+};
 
-if (TAG_TO_MATCH === 'undefined' || TAG_TO_MATCH == 'null') {
-  console.error("You need to specify a tag in the command line");
-} else {
-  begin();
-}
+begin();
