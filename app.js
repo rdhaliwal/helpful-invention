@@ -3,6 +3,7 @@ require('isomorphic-fetch');
 require('dotenv').config();
 const PromiseThrottle = require('promise-throttle');
 const json2csv = require('json2csv');
+const moment = require('moment');
 const fs = require('fs');
 const argv = require('yargs').argv;
 const TAG_TO_MATCH = argv.tag;
@@ -27,17 +28,28 @@ const generateCSV = (data) => {
   }
 };
 
+const validString = (str) => {
+  return (str !== undefined &&
+          str !== null &&
+          str.trim() !== "" &&
+          str.trim().length !== 0);
+}
+
 const extractData = (data) => {
   // console.log(JSON.stringify(data, null, 4));
+  let created_date = moment(data.created_at, "X"),
+      updated_date = moment(data.updated_at, "X");
 
-  let result = {};
-  result.id = data.id;
-  result.created_at = data.created_at;
-  result.updated_at = data.updated_at;
-  result.body = data.conversation_parts.conversation_parts.map(c => c.body).join(' | ');
-  result.subject = data.conversation_message.subject;
-  result.tags = data.tags.tags.map(t => t.name);
-  result.user = data.user;
+  let result = {
+    id: data.id,
+    createdAt: created_date.format("DD/MM/YYYY"),
+    updatedAt: updated_date.format("DD/MM/YYYY"),
+    weekNumber: updated_date.format("w"),
+    body: data.conversation_parts.conversation_parts.map(c => c.body).join(' | '),
+    email: validString(data.conversation_message.subject),
+    tags: data.tags.tags.map(t => t.name),
+    user: data.user
+  };
   return result;
 };
 
