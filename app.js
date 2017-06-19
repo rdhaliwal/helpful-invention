@@ -35,7 +35,7 @@ const validString = (str) => {
           str.trim().length !== 0);
 }
 
-const extractData = (data) => {
+const extractData = (data, tag) => {
   // console.log(JSON.stringify(data, null, 4));
   let created_date = moment(data.created_at, "X"),
       updated_date = moment(data.updated_at, "X");
@@ -47,8 +47,8 @@ const extractData = (data) => {
     weekNumber: updated_date.format("w"),
     body: data.conversation_parts.conversation_parts.map(c => c.body).join(' | '),
     email: validString(data.conversation_message.subject),
-    tags: data.tags.tags.map(t => t.name),
-    user: data.user
+    tags: tag.name,
+    user: data.user.id
   };
   return result;
 };
@@ -71,15 +71,13 @@ const fetchDetailedConversation = (conversationId) => {
   .then (json => {
     console.log(`FETCH - SUCCESS - Conversation ${conversationId}: ${Date()}`);
     let tagList = json.tags.tags;
-    let hasMatchingTags = tagList.length > 0;
 
-    if (hasMatchingTags && TAG_TO_MATCH !== undefined) {
-      let matchingTags = tagList.filter(t => t.id === `${TAG_TO_MATCH}`);
-      hasMatchingTags = matchingTags.length > 0;
+    if (tagList.length > 0 && TAG_TO_MATCH !== undefined) {
+      tagList = tagList.filter(t => t.id === `${TAG_TO_MATCH}`);
     }
 
-    if (hasMatchingTags) {
-      return extractData(json);
+    if (tagList.length > 0) {
+      return tagList.map(t => extractData(json, t));
     } else {
       return null;
     }
@@ -161,9 +159,10 @@ const begin = async () => {
 
   let conversationList = await fetchAllDetailedConversations(flattenedIdList);
   let detailedConversations = conversationList.filter(c => (c !== undefined && c !== null));
-  console.log(JSON.stringify(detailedConversations, null, 4));
+  let flattenedConversationList = [].concat(...detailedConversations);
+  console.log(JSON.stringify(flattenedConversationList, null, 4));
 
-  generateCSV(detailedConversations);
+  generateCSV(flattenedConversationList);
 };
 
 begin();
