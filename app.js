@@ -10,8 +10,7 @@ const TAG_TO_MATCH = argv.tag;
 
 const INTERCOM_API = process.env.INTERCOM_API;
 const INTERCOM_AUTH_TOKEN = process.env.INTERCOM_AUTH_TOKEN;
-const INTERCOM_PAGE_COUNT = 20;
-// const INTERCOM_PAGE_COUNT = 1;
+const INTERCOM_PAGE_COUNT = 50;
 const PER_PAGE = 60;
 const PROMISE_THROTTLE_RPS = 6;
 
@@ -45,7 +44,7 @@ const extractData = (data, tag) => {
     createdAt: created_date.format("DD/MM/YYYY"),
     updatedAt: updated_date.format("DD/MM/YYYY"),
     weekNumber: updated_date.format("w"),
-    body: data.conversation_parts.conversation_parts.map(c => c.body).join(' | '),
+    body:  data.conversation_message.body + data.conversation_parts.conversation_parts.map(c => c.body).join(' | '),
     email: validString(data.conversation_message.subject),
     tags: tag.name,
     user: data.user.id
@@ -80,6 +79,8 @@ const fetchDetailedConversation = (conversationId) => {
       return tagList.map(t => extractData(json, t));
     } else {
       return null;
+      // If you also want to export untagged conversations
+      // return extractData(json, {name: 'NO TAG'});
     }
   }).catch((err, json) => {
     console.log(`FETCH - ERROR - Conversation ${conversationId}`);
